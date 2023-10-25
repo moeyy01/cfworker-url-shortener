@@ -2,7 +2,7 @@
   <v-app :class="{ 'small-screen': smallScreen }">
     <v-main>
       <v-layout id="app" column align-center justify-center>
-        <div id="nav">
+        <!-- <div id="nav">
           <v-tooltip left>
             <template v-slot:activator="{ on, attrs }">
               <v-btn icon v-bind="attrs" v-on="on" @click="goToGitHub">
@@ -11,7 +11,7 @@
             </template>
             <span>GitHub</span>
           </v-tooltip>
-        </div>
+        </div> -->
         <div class="text-h3 text-sm-h2 mb-12" style="font-weight: 300">{{ title }}</div>
         <div id="url-input">
           <v-text-field
@@ -65,13 +65,13 @@
 import Snackbar from '@/components/snackbar';
 import copyText from '@/utils/clipboard';
 
-const urlReg = /^https?:\/\/[\w_-]+(\.[\w_-]+)+[!-~]*$|^$/;
+const urlReg = /^https?:\/\/[\w_-]+(\.[\w_-]+)+(:\d+)?[!-~]*$|^$/;
 
 export default {
   name: 'App',
   components: { Snackbar },
   data: () => ({
-    title: location.hostname,
+    title: '短网址',
     loading: false,
     url: '',
     lastUrl: '',
@@ -102,17 +102,17 @@ export default {
       if (this.canNotShorten || this.trimedUrl === this.lastUrl) return;
       this.shortenedUrl = '';
       this.loading = true;
-      return fetch('/shorten', {
+      return fetch('https://j1.pw', {
         method: 'POST',
         body: JSON.stringify({ url: this.trimedUrl }),
         headers: { 'content-type': 'application/json' },
       })
         .then(r => r.json())
-        .then(({ code, msg, url }) => {
-          if (code === 0) {
-            this.shortenedUrl = url;
+        .then(({ status, key }) => {
+          if (status === 200) {
+            this.shortenedUrl = 'https://j1.pw' + key;
             this.lastUrl = this.trimedUrl;
-          } else throw new Error(msg);
+          } else throw new Error(key);
         })
         .catch(e => {
           this.$refs.snackbar.show(e.toString());
